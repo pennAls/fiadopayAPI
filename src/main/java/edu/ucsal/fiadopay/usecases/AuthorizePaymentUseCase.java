@@ -15,12 +15,18 @@ public class AuthorizePaymentUseCase {
         this.paymentStrategyFactory = paymentStrategyFactory;
         this.paymentRepository = paymentRepository;
     }
+
     @Transactional
     public void execute(String paymentId) {
         var payment = paymentRepository.getOne(paymentId);
-        var strategy = paymentStrategyFactory.getStrategy(payment.getMethod());
-        var newStatus = strategy.process(payment);
-        payment.setStatus(newStatus);
+        try {
+            var strategy = paymentStrategyFactory.getStrategy(payment.getMethod());
+            var newStatus = strategy.process(payment);
+            payment.setStatus(newStatus);
+            paymentRepository.save(payment);
+        } catch (Exception e) {
+            payment.setStatus(Payment.Status.DECLINED);
+        }
         paymentRepository.save(payment);
     }
 }
