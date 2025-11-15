@@ -34,7 +34,7 @@ public class PaymentsWorkflow {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 } finally {
-                    var delivery = createWebhookUseCase.execute(payment);
+                    var delivery = createWebhookUseCase.execute(payment.getId());
                     if (delivery != null) {
                         executorService.submit(() -> dispatchWebhookUseCase.tryDeliver(delivery.getId()));
                     }

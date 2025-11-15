@@ -13,30 +13,30 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @RequestMapping("/fiadopay/gateway")
 @RequiredArgsConstructor
 public class PaymentController {
-  private final PaymentService service;
-  private final PaymentsWorkflow paymentsWorkflow;
+    private final PaymentService service;
+    private final PaymentsWorkflow paymentsWorkflow;
 
-  @PostMapping("/payments")
-  @SecurityRequirement(name = "bearerAuth")
-  public ResponseEntity<PaymentResponse> create(
-      @Parameter(hidden = true) @RequestHeader("Authorization") String auth,
-      @RequestHeader(value="Idempotency-Key", required=false) String idemKey,
-      @RequestBody @Valid PaymentRequest req
-  ) {
-    //var resp = service.createPayment(auth, idemKey, req);
-    var resp = paymentsWorkflow.execute(auth,idemKey,req);
-    return ResponseEntity.status(HttpStatus.CREATED).body(resp);
-  }
+    @PostMapping("/payments")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<PaymentResponse> create(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String auth,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idemKey,
+            @RequestBody @Valid PaymentRequest req
+    ) {
+        //var resp = service.createPayment(auth, idemKey, req);
+        var resp = paymentsWorkflow.execute(auth, idemKey, req);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resp);
+    }
 
-  @GetMapping("/payments/{id}")
-  public PaymentResponse get(@PathVariable String id) {
-    return service.getPayment(id);
-  }
+    @GetMapping("/payments/{id}")
+    public PaymentResponse get(@PathVariable String id) {
+        return service.getPayment(id);
+    }
 
-  @PostMapping("/refunds")
-  @SecurityRequirement(name = "bearerAuth")
-  public java.util.Map<String,Object> refund(@Parameter(hidden = true) @RequestHeader("Authorization") String auth,
-                                   @RequestBody @Valid RefundRequest body) {
-    return service.refund(auth, body.paymentId());
-  }
+    @PostMapping("/refunds")
+    @SecurityRequirement(name = "bearerAuth")
+    public java.util.Map<String, Object> refund(@Parameter(hidden = true) @RequestHeader("Authorization") String auth,
+                                                @RequestBody @Valid RefundRequest body) {
+        return service.refund(auth, body.paymentId());
+    }
 }

@@ -16,10 +16,10 @@ public class AntiFraudValidator implements PaymentStategy {
 
     @Override
     public Payment.Status process(Payment payment) {
-        if(payment.getAmount().compareTo(BigDecimal.valueOf(this.threshold)) > 0) {
+        if (payment.getAmount().compareTo(BigDecimal.valueOf(this.threshold)) < 0) {
             return Payment.Status.APPROVED;
         } else {
-           return Payment.Status.DECLINED;
+            return Payment.Status.DECLINED;
         }
     }
 }
