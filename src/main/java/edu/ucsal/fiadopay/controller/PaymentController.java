@@ -1,6 +1,7 @@
 package edu.ucsal.fiadopay.controller;
 
 import edu.ucsal.fiadopay.service.PaymentService;
+import edu.ucsal.fiadopay.workflows.PaymentsWorkflow;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @RequiredArgsConstructor
 public class PaymentController {
   private final PaymentService service;
+  private final PaymentsWorkflow paymentsWorkflow;
 
   @PostMapping("/payments")
   @SecurityRequirement(name = "bearerAuth")
@@ -21,7 +23,8 @@ public class PaymentController {
       @RequestHeader(value="Idempotency-Key", required=false) String idemKey,
       @RequestBody @Valid PaymentRequest req
   ) {
-    var resp = service.createPayment(auth, idemKey, req);
+    //var resp = service.createPayment(auth, idemKey, req);
+    var resp = paymentsWorkflow.execute(auth,idemKey,req);
     return ResponseEntity.status(HttpStatus.CREATED).body(resp);
   }
 
