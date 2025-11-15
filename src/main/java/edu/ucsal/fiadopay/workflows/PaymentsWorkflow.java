@@ -17,4 +17,21 @@ public class PaymentsWorkflow {
     private final AuthorizePaymentUseCase authorizePaymentUseCase;
     private final DispatchWebhookUseCase dispatchWebhookUseCase;
 
+    public PaymentResponse execute (String auth, String idemKey, PaymentRequest req) throws Exception {
+        PaymentCreationDTO result = createPendingPaymentUseCase.createPayment(auth, idemKey, req);
+        Payment payment = result.payment();
+
+        if(result.isNew()) {
+            return toResponse(payment);
+        } else{
+            throw new Exception("Erro de pagamento");
+        }
+    }
+    private PaymentResponse toResponse(Payment p){
+        return new PaymentResponse(
+                p.getId(), p.getStatus().name(), p.getMethod(),
+                p.getAmount(), p.getInstallments(), p.getMonthlyInterest(),
+                p.getTotalWithInterest()
+        );
+    }
 }
