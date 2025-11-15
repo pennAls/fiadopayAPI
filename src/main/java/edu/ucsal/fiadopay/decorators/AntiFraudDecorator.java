@@ -1,16 +1,14 @@
-package edu.ucsal.fiadopay.validators;
+package edu.ucsal.fiadopay.decorators;
 
 import edu.ucsal.fiadopay.domain.Payment;
 import edu.ucsal.fiadopay.strategies.PaymentStategy;
 
 import java.math.BigDecimal;
 
-public class AntiFraudValidator implements PaymentStategy {
-    private final PaymentStategy paymentStategy;
+public class AntiFraudDecorator implements PaymentStategy {
     private final double threshold;
 
-    public AntiFraudValidator(PaymentStategy paymentStategy, double threshold) {
-        this.paymentStategy = paymentStategy;
+    public AntiFraudDecorator( double threshold) {
         this.threshold = threshold;
     }
 

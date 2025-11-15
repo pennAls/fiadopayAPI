@@ -2,8 +2,10 @@ package edu.ucsal.fiadopay.factories;
 
 import edu.ucsal.fiadopay.annotations.AntiFraud;
 import edu.ucsal.fiadopay.annotations.PaymentMethod;
+import edu.ucsal.fiadopay.annotations.RandomicFailureRate;
+import edu.ucsal.fiadopay.decorators.RandomFailureDecorator;
 import edu.ucsal.fiadopay.strategies.PaymentStategy;
-import edu.ucsal.fiadopay.validators.AntiFraudValidator;
+import edu.ucsal.fiadopay.decorators.AntiFraudDecorator;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -24,7 +26,11 @@ public class PaymentStrategyFactory {
                 if(classe.isAnnotationPresent(AntiFraud.class)){
                     AntiFraud antiFraud = classe.getAnnotation(AntiFraud.class);
                     double threshold = antiFraud.threshold();
-                    selectedStrategy = new AntiFraudValidator(strategy,threshold);
+                    selectedStrategy = new AntiFraudDecorator(threshold);
+                }
+                if(classe.isAnnotationPresent(RandomicFailureRate.class)){
+                    RandomicFailureRate randomicFailureRate = classe.getAnnotation(RandomicFailureRate.class);
+                    selectedStrategy = new RandomFailureDecorator(randomicFailureRate.failureRate());
                 }
                 strategies.put(method,selectedStrategy);
             }
