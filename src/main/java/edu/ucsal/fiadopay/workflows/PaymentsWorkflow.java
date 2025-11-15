@@ -10,23 +10,31 @@ import edu.ucsal.fiadopay.usecases.DispatchWebhookUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Service
 @RequiredArgsConstructor
 public class PaymentsWorkflow {
     private final CreatePendingPaymentUseCase createPendingPaymentUseCase;
     private final AuthorizePaymentUseCase authorizePaymentUseCase;
     private final DispatchWebhookUseCase dispatchWebhookUseCase;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     public PaymentResponse execute (String auth, String idemKey, PaymentRequest req)  {
         PaymentCreationDTO result = createPendingPaymentUseCase.createPayment(auth, idemKey, req);
         Payment payment = result.payment();
 
         if(result.isNew()) {
-            try{
-                authorizePaymentUseCase.execute(payment.getId());
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
+            executorService.submit(()-> {
+                try {
+                    authorizePaymentUseCase.execute(payment.getId());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                } finally {
+
+                }
+            });
         }
         return toResponse(payment);
     }
