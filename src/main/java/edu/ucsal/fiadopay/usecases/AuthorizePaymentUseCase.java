@@ -24,7 +24,7 @@ public class AuthorizePaymentUseCase {
             var newStatus = strategy.process(payment);
             payment.setStatus(newStatus);
             paymentRepository.save(payment);
-        } catch (Exception e) {
+        } catch (Error e) {
             payment.setStatus(Payment.Status.DECLINED);
         }
         paymentRepository.save(payment);

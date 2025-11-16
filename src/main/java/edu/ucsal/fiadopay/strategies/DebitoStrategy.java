@@ -6,7 +6,7 @@ import edu.ucsal.fiadopay.domain.Payment;
 import org.springframework.stereotype.Component;
 
 @Component
-@PaymentMethod(type = "DEBITO")
+@PaymentMethod(type = "DEBIT")
 @RandomicFailureRate(failureRate = 0.3)
 public class DebitoStrategy implements PaymentStategy {
     @Override

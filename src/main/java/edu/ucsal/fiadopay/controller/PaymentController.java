@@ -3,6 +3,7 @@ package edu.ucsal.fiadopay.controller;
 import edu.ucsal.fiadopay.service.PaymentService;
 import edu.ucsal.fiadopay.usecases.GetPaymentUseCase;
 import edu.ucsal.fiadopay.workflows.PaymentsWorkflow;
+import edu.ucsal.fiadopay.workflows.RefundsWorkflow;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class PaymentController {
     private final PaymentService service;
     private final PaymentsWorkflow paymentsWorkflow;
     private final GetPaymentUseCase  getPaymentUseCase;
+    private final RefundsWorkflow refundsWorkflow;
 
     @PostMapping("/payments")
     @SecurityRequirement(name = "bearerAuth")
@@ -39,6 +41,6 @@ public class PaymentController {
     @SecurityRequirement(name = "bearerAuth")
     public java.util.Map<String, Object> refund(@Parameter(hidden = true) @RequestHeader("Authorization") String auth,
                                                 @RequestBody @Valid RefundRequest body) {
-        return service.refund(auth, body.paymentId());
+        return refundsWorkflow.execute(auth, body.paymentId());
     }
 }
