@@ -34,7 +34,7 @@ public class DispatchWebhookUseCase {
             deliveries.save(d);
             if(!d.isDelivered() && d.getAttempts()<5){
                 Thread.sleep(1000L * d.getAttempts());
-                tryDeliver(deliveryId);
+                execute(deliveryId);
             }
         } catch (Exception e){
             d.setAttempts(d.getAttempts()+1);
@@ -45,7 +45,7 @@ public class DispatchWebhookUseCase {
                 try {
                     Thread.sleep(1000L * d.getAttempts());
                 } catch (InterruptedException ignored) {}
-                tryDeliver(deliveryId);
+                execute(deliveryId);
             }
         }
     }
