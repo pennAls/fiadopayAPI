@@ -16,7 +16,7 @@ public class DispatchWebhookUseCase {
     public DispatchWebhookUseCase(WebhookDeliveryRepository deliveries) {
         this.deliveries = deliveries;
     }
-    public void tryDeliver(Long deliveryId){
+    public void execute(Long deliveryId){
         var d = deliveries.findById(deliveryId).orElse(null);
         if (d==null) return;
         try {

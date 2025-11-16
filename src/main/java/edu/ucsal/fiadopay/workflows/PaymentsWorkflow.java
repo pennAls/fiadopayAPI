@@ -38,7 +38,7 @@ public class PaymentsWorkflow {
                 } finally {
                     var delivery = createWebhookUseCase.execute(payment.getId());
                     if (delivery != null) {
-                        executorService.submit(() -> dispatchWebhookUseCase.tryDeliver(delivery.getId()));
+                        executorService.submit(() -> dispatchWebhookUseCase.execute(delivery.getId()));
                     }
                 }
             });

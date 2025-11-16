@@ -20,11 +20,9 @@ import java.util.concurrent.CompletableFuture;
 
 @Component
 public class CreatePendingPaymentUseCase {
-    private final MerchantRepository merchants;
     private final PaymentRepository payments;
 
-    public CreatePendingPaymentUseCase(MerchantRepository merchants, PaymentRepository payments) {
-        this.merchants = merchants;
+    public CreatePendingPaymentUseCase(PaymentRepository payments) {
         this.payments = payments;
     }
     @Transactional
