@@ -27,28 +27,8 @@ public class CreatePendingPaymentUseCase {
         this.merchants = merchants;
         this.payments = payments;
     }
-    private Merchant merchantFromAuth(String auth){
-        if (auth == null || !auth.startsWith("Bearer FAKE-")) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-        var raw = auth.substring("Bearer FAKE-".length());
-        long id;
-        try {
-            id = Long.parseLong(raw);
-        } catch (NumberFormatException ex) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-        var merchant = merchants.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-        if (merchant.getStatus() != Merchant.Status.ACTIVE) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-        return merchant;
-    }
     @Transactional
-    public PaymentCreationDTO createPayment(String auth, String idemKey, PaymentRequest req){
-        var merchant = merchantFromAuth(auth);
-        var mid = merchant.getId();
-
+    public PaymentCreationDTO createPayment(Long mid, String idemKey, PaymentRequest req){
         if (idemKey != null) {
             var existing = payments.findByIdempotencyKeyAndMerchantId(idemKey, mid);
             if(existing.isPresent())
