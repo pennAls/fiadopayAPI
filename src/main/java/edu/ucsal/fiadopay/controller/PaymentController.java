@@ -1,6 +1,7 @@
 package edu.ucsal.fiadopay.controller;
 
 import edu.ucsal.fiadopay.service.PaymentService;
+import edu.ucsal.fiadopay.usecases.GetPaymentUseCase;
 import edu.ucsal.fiadopay.workflows.PaymentsWorkflow;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 public class PaymentController {
     private final PaymentService service;
     private final PaymentsWorkflow paymentsWorkflow;
+    private final GetPaymentUseCase  getPaymentUseCase;
 
     @PostMapping("/payments")
     @SecurityRequirement(name = "bearerAuth")
@@ -30,7 +32,7 @@ public class PaymentController {
 
     @GetMapping("/payments/{id}")
     public PaymentResponse get(@PathVariable String id) {
-        return service.getPayment(id);
+        return getPaymentUseCase.execute(id);
     }
 
     @PostMapping("/refunds")
