@@ -3,8 +3,10 @@ package edu.ucsal.fiadopay.usecases;
 import edu.ucsal.fiadopay.domain.Merchant;
 import edu.ucsal.fiadopay.repo.MerchantRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+@Component
 public class ValidateMerchantAuthUseCase {
     private final MerchantRepository merchants;
 
