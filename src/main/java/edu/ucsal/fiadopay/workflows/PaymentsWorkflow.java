@@ -4,6 +4,7 @@ import edu.ucsal.fiadopay.controller.PaymentCreationDTO;
 import edu.ucsal.fiadopay.controller.PaymentRequest;
 import edu.ucsal.fiadopay.controller.PaymentResponse;
 import edu.ucsal.fiadopay.domain.Payment;
+import edu.ucsal.fiadopay.mappers.PaymentMapper;
 import edu.ucsal.fiadopay.usecases.AuthorizePaymentUseCase;
 import edu.ucsal.fiadopay.usecases.CreatePendingPaymentUseCase;
 import edu.ucsal.fiadopay.usecases.CreateWebhookUseCase;
@@ -21,6 +22,7 @@ public class PaymentsWorkflow {
     private final AuthorizePaymentUseCase authorizePaymentUseCase;
     private final DispatchWebhookUseCase dispatchWebhookUseCase;
     private final CreateWebhookUseCase createWebhookUseCase;
+    private final PaymentMapper mapper;
     private final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     public PaymentResponse execute(String auth, String idemKey, PaymentRequest req) {
@@ -41,14 +43,6 @@ public class PaymentsWorkflow {
                 }
             });
         }
-        return toResponse(payment);
-    }
-
-    private PaymentResponse toResponse(Payment p) {
-        return new PaymentResponse(
-                p.getId(), p.getStatus().name(), p.getMethod(),
-                p.getAmount(), p.getInstallments(), p.getMonthlyInterest(),
-                p.getTotalWithInterest()
-        );
+        return mapper.toResponse(payment);
     }
 }
