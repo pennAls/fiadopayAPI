@@ -26,29 +26,19 @@ A nova arquitetura foi desenhada em camadas com responsabilidades estritas (SRP)
 
 ### 1. Fluxo de Controle (Orquestração vs. Execução)
 * **Controller:** Atua apenas como porta de entrada (`@Valid` DTOs). Não contém regras.
-* **Workflows (`PaymentsWorkflow`, `RefundsWorkflow`):** Os "Maestros". Coordenam a chamada dos UseCases e gerenciam as Threads, mas não conhecem a regra de negócio detalhada (ex: cálculo de juros ou integração com Cielo).
+* **Workflows (`PaymentsWorkflow`, `RefundsWorkflow`):** Os "Maestros". Coordenam a chamada dos UseCases e gerenciam as Threads, mas não conhecem a regra de negócio detalhada 
 * **UseCases:** Unidades atômicas.
-    * `CreatePendingPaymentUseCase`: Síncrono. Garante persistência inicial e cálculo de preços.
-    * `AuthorizePaymentUseCase`: Assíncrono. Executa a cobrança e garante que o pagamento saia do estado `PENDING` (tratamento de falhas com *Fail Safe*).
-    * `ValidateMerchantAuthUseCase`: Reutilizável em múltiplos fluxos para centralizar a autenticação.
-
+* **`AuthorizePaymentUseCase`**: Executado de forma assíncrona, é responsável por efetivar a cobrança junto à estratégia de pagamento (Gateway). Possui tratamento de falhas robusto para garantir que o pagamento nunca permaneça em estado `PENDING` indefinidamente.
+* **`CreatePendingPaymentUseCase`**: Executado de forma síncrona no início do fluxo. Responsável por criar o registro inicial do pagamento, calcular juros de parcelamento e validar a chave de idempotência.
+* **`CreateWebhookUseCase`**: Atua como o "produtor" do sistema de notificações. Ele busca o estado mais recente ("fresco") do pagamento no banco, gera o payload seguro (HMAC) e agenda o envio na tabela de entregas.
+* **`DispatchWebhookUseCase`**: Atua como o "consumidor" ou trabalhador. É executado em uma thread isolada para realizar o envio HTTP real do webhook, gerenciando timeouts e políticas de retentativa sem bloquear o fluxo principal.
+* **`GetPaymentUseCase`**: Responsável pela operação de leitura, recuperando os dados detalhados de um pagamento específico através de seu ID.
+* **`RefundPaymentUseCase`**: Gerencia a lógica de negócio síncrona para a realização de estornos e reembolsos de transações aprovadas.
+* **`ValidateMerchantAuthUseCase`**: Um componente auxiliar que centraliza a lógica de autenticação do Merchant via token. É reutilizado tanto no fluxo de criação quanto no fluxo de reembolso para garantir o princípio DRY (Don't Repeat Yourself).
 ### 2. Concorrência e Assincronismo
 Para resolver problemas de latência e escalabilidade, abandonamos o processamento linear na thread HTTP.
 * **`ExecutorService` (FixedThreadPool):** O processamento pesado (Gateway e Webhook) é submetido a um pool de threads gerenciado.
 * **Idempotência (`isNew`):** Implementamos uma verificação atômica para garantir que cliques duplos não disparem duas threads de processamento simultâneas.
-
----
-
-## 🧩 Engenharia da Factory (Pipeline OCP)
-
-Um dos pontos altos da refatoração foi a eliminação de condicionais (`if/else`) na criação das estratégias, garantindo o **Princípio Aberto/Fechado (Open/Closed Principle)**.
-
-Utilizamos o padrão **Chain of Responsibility** combinado com a **Injeção de Dependência do Spring**:
-
-1.  **A Interface `DecoratorProvider`:** Define um contrato para componentes que sabem "aplicar" um Decorator (ex: Fraude, Log, Falha).
-2.  **Injeção de Lista (`List<DecoratorProvider>`):** O Spring escaneia o projeto e injeta automaticamente na Factory todos os componentes (`@Component`) que implementam essa interface.
-3.  **Pipeline Dinâmico:** A `PaymentStrategyFactory` itera sobre essa lista e passa a estratégia base por cada provider.
-    * *Resultado:* Para adicionar uma nova regra (ex: Log de Auditoria), basta criar uma nova classe `LogProvider`. **Não é necessário alterar uma única linha de código na Factory.**
 
 ---
 
@@ -64,6 +54,36 @@ A refatoração foi fortemente baseada nos padrões do GoF.
 | **Mapper** | `PaymentMapper`. | Isola a lógica de conversão Entidade-DTO, seguindo o princípio DRY. |
 
 ---
+
+## 🧩 Engenharia da Factory (Pipeline OCP)
+
+Um dos pontos altos da refatoração foi a implementação de um **Pipeline de Montagem Dinâmico**, eliminando condicionais rígidas (`if/else`) e garantindo o **Princípio Aberto/Fechado (OCP)**.
+
+A arquitetura utiliza o padrão **Chain of Responsibility** para transformar metadados (Anotações) em comportamento (Decorators) de forma desacoplada:
+
+### 1. Identificação e Registro (Allowlist)
+O processo inicia com a validação da anotação **`@PaymentMethod`**.
+* Ao inicializar, o Spring injeta todas as classes que implementam `PaymentStrategy`.
+* A Factory itera sobre elas e verifica a presença de `@PaymentMethod`.
+* **A Regra:** Se a classe não possuir essa anotação, ela é **ignorada/rejeitada** imediatamente. Isso atua como uma autenticação interna: apenas estratégias explicitamente marcadas com esse "crachá" são registradas no sistema.
+
+### 2. O Fluxo de Montagem (The Pipeline)
+Para as estratégias aceitas (ex: `CardStrategy`), inicia-se o processo de "decoração" através dos **Providers**:
+
+1.  **Coleta:** A Factory recebe uma lista injetada de `DecoratorProvider` (ex: `AntiFraudProvider`, `RandomFailureProvider`).
+2.  **Execução da Cadeia:** A estratégia base é passada sequencialmente por cada Provider.
+    * O **Provider** inspeciona a classe original via **Reflexão**.
+    * **Se a anotação de regra estiver presente** (ex: `@AntiFraud`): O Provider instancia o Decorator específico, "embrulha" a estratégia atual dentro dele e retorna o novo objeto composto.
+    * **Se não:** Retorna a estratégia inalterada para o próximo passo.
+
+### 3. Resultado Técnico
+Ao final do pipeline, a Factory armazena no mapa (sob a chave definida em `@PaymentMethod`) um objeto complexo pronto para uso: pode ser uma estratégia pura ou uma "cebola" de decorators (ex: `AntiFraud(Random(Card))`).
+
+---
+
+
+
+
 
 ## 🧩 Metaprogramação (Anotações Customizadas)
 
