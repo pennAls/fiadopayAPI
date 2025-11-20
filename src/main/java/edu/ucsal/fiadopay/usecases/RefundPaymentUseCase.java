@@ -5,10 +5,8 @@ import edu.ucsal.fiadopay.repo.PaymentRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.Instant;
-import java.util.Map;
-import java.util.UUID;
+
 
 @Component
 public class RefundPaymentUseCase {
