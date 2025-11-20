@@ -81,10 +81,6 @@ Ao final do pipeline, a Factory armazena no mapa (sob a chave definida em `@Paym
 
 ---
 
-
-
-
-
 ## 🧩 Metaprogramação (Anotações Customizadas)
 
 O sistema é configurado declarativamente através de anotações criadas especificamente para o domínio:
@@ -163,6 +159,15 @@ Substitui PSPs reais com um backend em memória (H2).
 # ou
 mvn spring-boot:run
 ```
+
+## Pré-requisitos
+
+Para executar este projeto, certifique-se de ter o ambiente configurado com:
+
+Java: JDK 21 ou superior.
+
+Maven: 3.9.x ou superior.
+
 
 h2 console: http://localhost:8080/h2  
 Swagger UI: http://localhost:8080/swagger-ui.html
