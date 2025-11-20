@@ -109,24 +109,48 @@ A lógica de Webhooks foi desacoplada para evitar o bloqueio das threads de paga
 ### 1. Payments Workflow (Orquestração Assíncrona)
 *Visualização do Maestro coordenando criação, autorização (thread pool) e webhook.*
 
-[INSIRA PRINT DA CLASSE PAYMENTS WORKFLOW AQUI]
+<img width="861" height="753" alt="image" src="https://github.com/user-attachments/assets/8b9bfa7c-fd49-49cf-a702-3391ab51504a" />
+
 
 ### 2. Refunds Workflow (Reuso de Código)
 *Evidência do reuso dos UseCases de Autenticação e Webhook em um fluxo diferente.*
 
-[INSIRA PRINT DA CLASSE REFUNDS WORKFLOW AQUI]
+<img width="764" height="614" alt="image" src="https://github.com/user-attachments/assets/bbfe5140-aeed-4890-8b8d-63e314f479eb" />
 
 ### 3. Payment Strategy Factory (Lógica OCP)
 *O coração da engenharia: montagem dinâmica baseada na lista de providers injetada.*
 
-[INSIRA PRINT DA CLASSE PAYMENT STRATEGY FACTORY AQUI]
+<img width="967" height="610" alt="image" src="https://github.com/user-attachments/assets/09ca706f-18e4-4f3b-844c-b8c5800bb0ec" />
 
-### 4. Providers & Decorators
-*A implementação isolada das regras de negócio (ex: AntiFraude) que são plugadas na Factory.*
+### 4. Annotations
 
-[INSIRA PRINT DE UM DECORATOR PROVIDER E SEU DECORATOR AQUI]
+<img width="340" height="133" alt="image" src="https://github.com/user-attachments/assets/8d2a401a-f3df-4a9d-9a31-e6f69f617f3d" />
+<img width="340" height="133" alt="image" src="https://github.com/user-attachments/assets/07896da3-c43d-4966-b479-baa485ce79d2" />
+<img width="340" height="133" alt="image" src="https://github.com/user-attachments/assets/32e2469e-bee4-4413-9468-de00ab852b11" />
 
----
+### 5. Strategies (Implementações Concretas)
+
+Classes que contêm a lógica de comunicação com o Gateway (Mock), marcadas com @PaymentMethod.
+
+<img width="453" height="217" alt="image" src="https://github.com/user-attachments/assets/997b5bc8-eddc-4196-b96d-84c21860a8df" />
+<img width="453" height="217" alt="image" src="https://github.com/user-attachments/assets/70d983d0-a414-43f5-9b6b-1bb12b6690f9" />
+<img width="453" height="217" alt="image" src="https://github.com/user-attachments/assets/09be3ad5-5519-4e20-9147-b6cec95ae9f5" />
+<img width="453" height="217" alt="image" src="https://github.com/user-attachments/assets/97f48e9d-4a22-47d8-b3fc-ecfffffe29d6" />
+
+### 6. Decorators
+
+A implementação isolada das regras de negócio (ex: AntiFraude) que são plugadas nas strategies.
+
+<img width="690" height="359" alt="image" src="https://github.com/user-attachments/assets/d8faec82-b8ee-4b96-a809-3984da549947" />
+<img width="652" height="320" alt="image" src="https://github.com/user-attachments/assets/0132479b-2793-4e20-9a6d-d4e438a616b1" />
+
+### 7. Providers
+
+Componentes especialistas que encapsulam a lógica de leitura de anotações e montagem dos Decorators, permitindo que a Factory siga o princípio OCP.
+
+<img width="652" height="320" alt="image" src="https://github.com/user-attachments/assets/72ab77d4-7952-4e9f-93f6-6c329b140c8d" />
+<img width="804" height="320" alt="image" src="https://github.com/user-attachments/assets/0e77b8d6-5418-427b-98e7-f5071861696a" />
+
 
 # 💻 Como Rodar (FiadoPay Simulator)
 
